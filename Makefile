@@ -1,12 +1,14 @@
 all: server client
 
-server:
-	gcc -g -o server ipc_server.c
+server: ipc_server.c
+	gcc -g -o $@ $^
+	chmod +x $@
 
-client:
-	gcc -g -o client ipc_client.c
+client: ipc_client.c
+	gcc -g -o $@ $^
+	chmod +x $@
 
 clean:
 	rm -rf server client
 
-.phony: clean
+.phony: clean client server
