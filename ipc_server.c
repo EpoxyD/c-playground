@@ -14,16 +14,27 @@
 #include <sys/un.h>
 #include <unistd.h>
 
+static void add_param(char *msg, int *offset, void *param, const int len);
+
+#define ADD_INT(msg, offset, value) add_param(msg, offset, &value, sizeof(int));
+#define ADD_UINT32(msg, offset, value) add_param(msg, offset, &value, sizeof(uint32_t));
+#define ADD_STRING(msg, offset, str) add_string(msg, offset, str, strlen(str) + 1);
+
 static int sockfd = -1;
 static int clientfd = -1;
 
 #define SOCKFILE "/tmp/zigbee.ipc"
 #define BUFSIZE 1024
 
-#define SAH_TRACE_ERROR(...) printf(__VA_ARGS__);
-#define SAH_TRACE_INFO(...) printf(__VA_ARGS__);
+#define SAH_TRACE_ERROR(...) \
+    printf("[ERROR] ");      \
+    printf(__VA_ARGS__);
+#define SAH_TRACE_INFO(...) \
+    printf("[INFO] ");      \
+    printf(__VA_ARGS__);
 
 static void dump(char *msg) {
+    printf("[DEBUG] ");
     for (int i = 0; i < 50; i++)
         printf("%c", msg[i]);
     printf("\n");
@@ -89,8 +100,6 @@ static void add_string(char *msg, int *offset, char *str, const int len) {
 int main(void) {
     setup_connection();
 
-    printf("%lu\n", sizeof(void));
-
     char message[] = "Hello World!";
     send_message(message, strlen(message) + 1);
 
@@ -102,9 +111,12 @@ int main(void) {
     int x = 512;
     char str[] = "Woo Hoo";
     uint32_t sz = 5678;
-    add_param(msg, &offset, &x, sizeof(int));
-    add_string(msg, &offset, str, strlen(str) + 1);
-    add_param(msg, &offset, &sz, sizeof(uint32_t));
+    // add_param(msg, &offset, &x, sizeof(int));
+    // add_string(msg, &offset, str, strlen(str) + 1);
+    // add_param(msg, &offset, &sz, sizeof(uint32_t));
+    ADD_INT(msg, &offset, x);
+    ADD_STRING(msg, &offset, str);
+    ADD_UINT32(msg, &offset, sz);
     dump(msg);
     send_message(msg, offset);
 
